@@ -6,39 +6,39 @@ const Alexa = require('ask-sdk-core');
 const PERMISSION = 'alexa::alerts:timers:skill:readwrite';
 
 const LaunchRequestHandler = {
-  canHandle(handlerInput) {
-    return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
-  },
-  handle(handlerInput) {
-    let speechOutput = 'タイマーのサンプルにようこそ。';
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
+    },
+    handle(handlerInput) {
+        let speechOutput = 'タイマーのサンプルにようこそ。';
 
-    let response = verifyConsentToken(handlerInput);
-    if (response) return response;
-      
-    speechOutput += 'このスキルでは、５分のタイマーをセットして、のようにタイマーの時間を設定することができます。どうしますか？';
-    return handlerInput.responseBuilder
-        .speak(speechOutput)
-        .reprompt(speechOutput)
-        .getResponse();
-  }
+        let response = verifyConsentToken(handlerInput);
+        if (response) return response;
+        
+        speechOutput += 'このスキルでは、５分のタイマーをセットして、のようにタイマーの時間を設定することができます。どうしますか？';
+        return handlerInput.responseBuilder
+            .speak(speechOutput)
+            .reprompt(speechOutput)
+            .getResponse();
+    }
 };
 
 function verifyConsentToken(handlerInput){
-  const {permissions} = handlerInput.requestEnvelope.context.System.user;
-  if (!(permissions && permissions.consentToken)){
-    return handlerInput.responseBuilder
-            .addDirective({
-              type: 'Connections.SendRequest',
-              'name': 'AskFor',
-              'payload': {
-                '@type': 'AskForPermissionsConsentRequest',
-                '@version': '1',
-                'permissionScope': PERMISSION
-              },
-              token: ''
-        }).getResponse();
-   }
-  return null;
+    const {permissions} = handlerInput.requestEnvelope.context.System.user;
+    if (!(permissions && permissions.consentToken)){
+        return handlerInput.responseBuilder
+                .addDirective({
+                    type: 'Connections.SendRequest',
+                    'name': 'AskFor',
+                    'payload': {
+                        '@type': 'AskForPermissionsConsentRequest',
+                        '@version': '1',
+                        'permissionScope': PERMISSION
+                    },
+                    token: ''
+            }).getResponse();
+    }
+    return null;
 }
 
 const SetTimerIntentHandler = {
@@ -104,95 +104,95 @@ const SetTimerIntentHandler = {
 };
 
 const ReadTimerIntentHandler = {
-  canHandle(handlerInput) {
-      return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-          && handlerInput.requestEnvelope.request.intent.name === 'readTimerIntent';
-  },
-  async handle(handlerInput) {
-      const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
-      let timerId = sessionAttributes['lastTimerId'];
+    canHandle(handlerInput) {
+        return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+            && handlerInput.requestEnvelope.request.intent.name === 'readTimerIntent';
+    },
+    async handle(handlerInput) {
+        const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+        let timerId = sessionAttributes['lastTimerId'];
 
-      try {
-          const timerServiceClient = handlerInput.serviceClientFactory.getTimerManagementServiceClient();
-          const timersList = await timerServiceClient.getTimers();
-          console.log('タイマー一覧: ' + JSON.stringify(timersList));
+        try {
+            const timerServiceClient = handlerInput.serviceClientFactory.getTimerManagementServiceClient();
+            const timersList = await timerServiceClient.getTimers();
+            console.log('タイマー一覧: ' + JSON.stringify(timersList));
 
-          const totalCount = timersList.totalCount;
-          const preText = totalCount ? `現在、${totalCount}個のタイマーがセットされています。` : '';
-          if(timerId || totalCount > 0) {
-              timerId = timerId ? timerId : timersList.timers[0].id; 
-              const timerResponse = await timerServiceClient.getTimer(timerId);       
-              console.log('タイマー応答: ' + JSON.stringify(timerResponse));
-              const timerStatus = timerResponse.status;
-              let status;
-              switch (timerStatus) {
-                  case 'ON':
-                      status = '起動中です';
-                      break;
-                  case 'OFF':
-                      status = 'オフになっています';
-                      break;
-                  case 'PAUSED':
-                      status = '停止中です';
-                      break;
-              }
-              return handlerInput.responseBuilder
-                  .speak(preText + `お客様のタイマーは、現在 ${status}。次は、どうしますか？`)
-                  .reprompt('次は、どうしますか？')
-                  .getResponse();
-          } else {
-              return handlerInput.responseBuilder
-                  .speak(preText + '現在、タイマーがセットされていません。タイマーをセットして、と言ってみてください。次は、どうしますか？')
-                  .reprompt('次は、どうしますか？')
-                  .getResponse();
-          }
-      } catch (error) {
-          console.log('タイマー読み取りエラー: ' + JSON.stringify(error));
-          return handlerInput.responseBuilder
-                     .speak('タイマーの状態を調べるのに失敗しました。ごめんなさい。次は、どうしますか？')
-                     .reprompt('次は、どうしますか？')
-                     .getResponse();
-      }
-  }
+            const totalCount = timersList.totalCount;
+            const preText = totalCount ? `現在、${totalCount}個のタイマーがセットされています。` : '';
+            if(timerId || totalCount > 0) {
+                timerId = timerId ? timerId : timersList.timers[0].id; 
+                const timerResponse = await timerServiceClient.getTimer(timerId);       
+                console.log('タイマー応答: ' + JSON.stringify(timerResponse));
+                const timerStatus = timerResponse.status;
+                let status;
+                switch (timerStatus) {
+                    case 'ON':
+                        status = '起動中です';
+                        break;
+                    case 'OFF':
+                        status = 'オフになっています';
+                        break;
+                    case 'PAUSED':
+                        status = '停止中です';
+                        break;
+                }
+                return handlerInput.responseBuilder
+                    .speak(preText + `お客様のタイマーは、現在 ${status}。次は、どうしますか？`)
+                    .reprompt('次は、どうしますか？')
+                    .getResponse();
+            } else {
+                return handlerInput.responseBuilder
+                    .speak(preText + '現在、タイマーがセットされていません。タイマーをセットして、と言ってみてください。次は、どうしますか？')
+                    .reprompt('次は、どうしますか？')
+                    .getResponse();
+            }
+        } catch (error) {
+            console.log('タイマー読み取りエラー: ' + JSON.stringify(error));
+            return handlerInput.responseBuilder
+                .speak('タイマーの状態を調べるのに失敗しました。ごめんなさい。次は、どうしますか？')
+                .reprompt('次は、どうしますか？')
+                .getResponse();
+        }
+    }
 }
 
 const AskForResponseHandler = {
-  canHandle(handlerInput) {
-    return Alexa.getRequestType(handlerInput.requestEnvelope) === 'Connections.Response'
-        && handlerInput.requestEnvelope.request.name === 'AskFor';
-  },
-  async handle(handlerInput) {
-    const { payload, status } = handlerInput.requestEnvelope.request;
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'Connections.Response'
+            && handlerInput.requestEnvelope.request.name === 'AskFor';
+    },
+    async handle(handlerInput) {
+        const { payload, status } = handlerInput.requestEnvelope.request;
 
-    if (status.code === '200') {
-      switch (payload.status) {
-        case 'ACCEPTED':
-          handlerInput.responseBuilder
-            .speak('それでは、セットしたい時間で、「何分のタイマーをセットして」のように言ってみてください。次は、どうしますか？')
-            .reprompt('次はどうしますか？');
-          break;
-        case 'DENIED':
-        case 'NOT_ANSWERED':
-          handlerInput.responseBuilder
-            .speak('タイマーの使用許可をいただけなかったので、このスキルを続けることができません。後ほどもう一度お試しください。バイバイ');
-          break;
-      }
-      if(payload.status !== 'ACCEPTED' && !payload.isCardThrown){
-        handlerInput.responseBuilder
-          .speak('お客様のAlexaアプリに、このスキルがタイマーを使用することを許可するためのカードを送りました。権限を許可していただいた後に、もう一度このスキルを呼び出してください。')
-          .withAskForPermissionsConsentCard([PERMISSION]);
-      }
-      return handlerInput.responseBuilder.getResponse();
-    }
+        if (status.code === '200') {
+            switch (payload.status) {
+                case 'ACCEPTED':
+                    handlerInput.responseBuilder
+                        .speak('それでは、セットしたい時間で、「何分のタイマーをセットして」のように言ってみてください。次は、どうしますか？')
+                        .reprompt('次はどうしますか？');
+                    break;
+                case 'DENIED':
+                case 'NOT_ANSWERED':
+                    handlerInput.responseBuilder
+                        .speak('タイマーの使用許可をいただけなかったので、このスキルを続けることができません。後ほどもう一度お試しください。バイバイ');
+                    break;
+            }
+            if(payload.status !== 'ACCEPTED' && !payload.isCardThrown){
+                handlerInput.responseBuilder
+                    .speak('お客様のAlexaアプリに、このスキルがタイマーを使用することを許可するためのカードを送りました。権限を許可していただいた後に、もう一度このスキルを呼び出してください。')
+                    .withAskForPermissionsConsentCard([PERMISSION]);
+            }
+            return handlerInput.responseBuilder.getResponse();
+        }
 
-    if (status.code === '400') console.log('スキルに権限設定がされていません');
+        if (status.code === '400') console.log('スキルに権限設定がされていません');
 
-    console.log(`Connections.Responseエラー: ${status.message}`);
+        console.log(`Connections.Responseエラー: ${status.message}`);
 
-    return handlerInput.responseBuilder
-        .speak('タイマーの使用許可をいただく途中でエラーが起きてしまいました。後ほどもう一度お試しください。バイバイ')
-        .getResponse();
-  }
+        return handlerInput.responseBuilder
+            .speak('タイマーの使用許可をいただく途中でエラーが起きてしまいました。後ほどもう一度お試しください。バイバイ')
+            .getResponse();
+        }
 };
 
 const PauseTimerIntentHandler = {
@@ -314,26 +314,13 @@ const DeleteTimerIntentHandler = {
     }
 }
 
-const HelloWorldIntentHandler = {
-    canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'HelloWorldIntent';
-    },
-    handle(handlerInput) {
-        const speakOutput = 'Hello World!';
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-            .getResponse();
-    }
-};
 const HelpIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
             && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.HelpIntent';
     },
     handle(handlerInput) {
-        const speakOutput = 'You can say hello to me! How can I help?';
+        const speakOutput = 'このスキルでは、５分のタイマーをセットして、のようにタイマーの時間を設定することができます。どうしますか？';
 
         return handlerInput.responseBuilder
             .speak(speakOutput)
@@ -348,7 +335,7 @@ const CancelAndStopIntentHandler = {
                 || Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.StopIntent');
     },
     handle(handlerInput) {
-        const speakOutput = 'Goodbye!';
+        const speakOutput = 'バイバイ！';
         return handlerInput.responseBuilder
             .speak(speakOutput)
             .getResponse();
@@ -416,7 +403,7 @@ exports.handler = Alexa.SkillBuilders.custom()
         HelpIntentHandler,
         CancelAndStopIntentHandler,
         SessionEndedRequestHandler,
-        IntentReflectorHandler, // make sure IntentReflectorHandler is last so it doesn't override your custom intent handlers
+        //IntentReflectorHandler, // make sure IntentReflectorHandler is last so it doesn't override your custom intent handlers
     )
     .addErrorHandlers(
         ErrorHandler,
