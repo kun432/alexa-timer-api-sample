@@ -1,0 +1,68 @@
+{
+  "interactionModel": {
+      "languageModel": {
+          "invocationName": "タイマーのサンプルスキル",
+          "intents": [
+              {
+                  "name": "AMAZON.CancelIntent",
+                  "samples": []
+              },
+              {
+                  "name": "AMAZON.HelpIntent",
+                  "samples": []
+              },
+              {
+                  "name": "AMAZON.StopIntent",
+                  "samples": []
+              },
+              {
+                  "name": "AMAZON.NavigateHomeIntent",
+                  "samples": []
+              },
+              {
+                  "name": "setTimerIntent",
+                  "slots": [
+                      {
+                          "name": "duration",
+                          "type": "AMAZON.DURATION"
+                      }
+                  ],
+                  "samples": [
+                      "{duration} のタイマーをセット",
+                      "タイマーを {duration} にセット"
+                  ]
+              },
+              {
+                  "name": "readTimerIntent",
+                  "slots": [],
+                  "samples": [
+                      "タイマーをチェック",
+                      "タイマーをチェックして"
+                  ]
+              },
+              {
+                  "name": "AMAZON.PauseIntent",
+                  "samples": [
+                      "タイマーを一時停止して",
+                      "タイマーを一時停止",
+                      "タイマーを停止",
+                      "タイマーを停止して"
+                  ]
+              },
+              {
+                  "name": "AMAZON.ResumeIntent",
+                  "samples": []
+              },
+              {
+                  "name": "deleteTimerIntent",
+                  "slots": [],
+                  "samples": [
+                      "タイマーを削除",
+                      "タイマーを削除して"
+                  ]
+              }
+          ],
+          "types": []
+      }
+  }
+}
